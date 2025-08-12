@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF文件上传站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .auth-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            margin: 0 8px;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+        }
+
+        .btn.secondary:hover {
+            background: #545b62;
+        }
+
+        .btn.danger {
+            background: #dc3545;
+        }
+
+        .btn.danger:hover {
+            background: #c82333;
+        }
+
+        .btn.success {
+            background: #28a745;
+        }
+
+        .btn.success:hover {
+            background: #1e7e34;
+        }
+
+        .btn.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn.warning:hover {
+            background: #e0a800;
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .password-input {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .password-input input {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 10px;
+            width: 200px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            height: fit-content;
+            border: 1px solid #e9ecef;
+        }
+
+        .content-area {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .data-analysis {
+            margin-bottom: 30px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-analysis h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .analysis-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+
+        .analysis-card:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+
+        .analysis-number {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #007bff;
+            margin-bottom: 8px;
+        }
+
+        .analysis-label {
+            color: #6c757d;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .upload-area {
+            border: 2px dashed #ced4da;
+            padding: 30px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+            transform: translateY(-1px);
+        }
+
+        .upload-area.dragover {
+            border-color: #007bff;
+            background: #e7f3ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .upload-status {
+            min-height: 24px;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .upload-status.success {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .upload-status.uploading {
+            color: #007bff;
+        }
+
+        .upload-status.error {
+            color: #dc3545;
+            font-weight: 500;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+        }
+
+        .file-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .file-controls h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .file-controls-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .time-filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .download-section {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-filters {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-filter {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #e9ecef;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-filter:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .btn-filter.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .date-picker-section {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .date-picker-section input[type="date"] {
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .date-picker-section input[type="date"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+        }
+
+        .file-view-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .select-all-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .select-all-area input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+
+        .batch-actions {
+            display: none;
+            gap: 10px;
+            margin-left: 20px;
+        }
+
+        .batch-actions.show {
+            display: flex;
+        }
+
+        .file-list-simple {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .file-list-simple.collapsed {
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            transition: all 0.2s;
+        }
+
+        .file-item:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+
+        .file-item.selected {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+
+        .file-checkbox {
+            margin-right: 15px;
+        }
+
+        .file-checkbox input[type="checkbox"] {
+            transform: scale(1.1);
+        }
+
+        .file-icon-simple {
+            width: 32px;
+            height: 32px;
+            background: #dc3545;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 10px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name-simple {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-date-simple {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .file-actions-simple {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .file-actions-simple .btn {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .stats-section {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .stats-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .stats-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-nav .btn {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #e9ecef;
+        }
+
+        .stats-nav .btn:hover {
+            background: #e9ecef;
+        }
+
+        .stats-nav .btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .stats-content {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-item.total {
+            background: #e7f3ff;
+            padding: 12px;
+            margin: -16px -16px 12px -16px;
+            border-radius: 6px 6px 0 0;
+            font-weight: 600;
+            border-bottom: 1px solid #007bff;
+        }
+
+        .no-files {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        .user-indicator {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #28a745;
+            color: white;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .admin-only {
+            display: none;
+        }
+
+        .admin-only.show {
+            display: block;
+        }
+
+        .user-only {
+            display: none;
+        }
+
+        .user-only.show {
+            display: block;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .file-input-label:hover {
+            background: #1e7e34;
+        }
+
+        .quick-stats {
+            margin-top: 24px;
+        }
+
+        .quick-stats h4 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .data-backup-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .data-backup-section h4 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .backup-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .backup-info {
+            color: #6c757d;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .time-download-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .time-download-section h4 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .time-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .time-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .time-stat-item:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+
+        .time-stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .time-stat-info span:first-child {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .time-stat-info span:last-child {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .btn-small {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            min-width: 50px;
+        }
+
+        .btn-small:hover {
+            background: #1e7e34;
+        }
+
+        .btn-small:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-small.secondary {
+            background: #6c757d;
+        }
+
+        .btn-small.secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-small.danger {
+            background: #dc3545;
+        }
+
+        .btn-small.danger:hover {
+            background: #c82333;
+        }
+
+        .selected-count {
+            font-size: 12px;
+            color: #007bff;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .file-controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .file-controls-right {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .time-filter-section {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .time-filters {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            
+            .date-picker-section {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .download-section {
+                width: 100%;
+            }
+            
+            .select-all-area {
+                width: 100%;
+            }
+            
+            .file-view-controls {
+                width: 100%;
+            }
+            
+            .batch-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+            
+            .analysis-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PDF文件管理站</h1>
+            <p>简洁高效的文档管理平台</p>
+        </div>
+
+        <div class="auth-section">
+            <div id="authButtons">
+                <button class="btn" onclick="showPasswordInput()">管理员登录</button>
+                <button class="btn secondary" onclick="loginAsUser()">访客浏览</button>
+                
+                <div class="password-input" id="passwordInput">
+                    <input type="password" id="adminPassword" placeholder="请输入管理员密码">
+                    <button class="btn" onclick="verifyPassword()">确认</button>
+                    <button class="btn secondary" onclick="hidePasswordInput()">取消</button>
+                </div>
+            </div>
+            
+            <div id="userInfo" style="display: none;">
+                <span id="userIndicator" class="user-indicator"></span>
+                <button class="btn secondary" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>文件操作</h3>
+                
+                <div class="admin-only" id="uploadSection">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📄</div>
+                        <p class="upload-text">拖拽PDF文件到此处 或 点击选择</p>
+                        <p class="upload-hint">支持多文件同时上传 • 快捷键 Ctrl+O</p>
+                        <label for="fileInput" class="file-input-label">选择PDF文件</label>
+                        <input type="file" id="fileInput" accept=".pdf" multiple>
+                    </div>
+                    <div class="upload-status" id="uploadStatus"></div>
+                </div>
+
+                <input type="text" class="search-box" id="searchInput" placeholder="搜索PDF文件名...">
+                
+                <div class="quick-stats">
+                    <h4>统计概览</h4>
+                    <div class="stat-item">
+                        <span>总文件数</span>
+                        <span id="totalFiles">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>今日上传</span>
+                        <span id="todayFiles">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>当前显示</span>
+                        <span id="visibleFiles">0</span>
+                    </div>
+                    <div class="admin-only stat-item">
+                        <span>已选择</span>
+                        <span id="selectedCount">0</span>
+                    </div>
+                </div>
+
+                <!-- 数据备份功能 -->
+                <div class="data-backup-section">
+                    <h4>数据备份</h4>
+                    <div class="backup-controls">
+                        <button class="btn-small secondary" onclick="exportData()">导出数据</button>
+                        <label for="importDataInput" class="btn-small success">
+                            导入数据
+                            <input type="file" id="importDataInput" accept=".json" style="display: none;" onchange="importData(event)">
+                        </label>
+                        <div class="admin-only">
+                            <button class="btn-small danger" onclick="clearAllData()">清空数据</button>
+                        </div>
+                    </div>
+                    <div class="backup-info">
+                        <small>💡 导出数据可保存所有文件，导入可恢复</small>
+                    </div>
+                </div>
+
+                <!-- 访客专属：时间段下载 -->
+                <div class="user-only time-download-section">
+                    <h4>时间段下载</h4>
+                    <div class="time-stats" id="timeStats">
+                        <div class="time-stat-item">
+                            <div class="time-stat-info">
+                                <span>今日</span>
+                                <span id="todayCount">0 个文件</span>
+                            </div>
+                            <button class="btn-small" onclick="downloadByPeriod('today')">下载</button>
+                        </div>
+                        <div class="time-stat-item">
+                            <div class="time-stat-info">
+                                <span>本周</span>
+                                <span id="weekCount">0 个文件</span>
+                            </div>
+                            <button class="btn-small" onclick="downloadByPeriod('week')">下载</button>
+                        </div>
+                        <div class="time-stat-item">
+                            <div class="time-stat-info">
+                                <span>本月</span>
+                                <span id="monthCount">0 个文件</span>
+                            </div>
+                            <button class="btn-small" onclick="downloadByPeriod('month')">下载</button>
+                        </div>
+                        <div class="time-stat-item">
+                            <div class="time-stat-info">
+                                <span>本年</span>
+                                <span id="yearCount">0 个文件</span>
+                            </div>
+                            <button class="btn-small" onclick="downloadByPeriod('year')">下载</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- 访客专属：简洁数据分析 -->
+                <div class="user-only data-analysis" id="dataAnalysis">
+                    <h3>数据概览</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <div class="analysis-number" id="analysisTotal">0</div>
+                            <div class="analysis-label">总文件数</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-number" id="analysisAvgDaily">0</div>
+                            <div class="analysis-label">日均上传</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-number" id="analysisMostActive">-</div>
+                            <div class="analysis-label">最活跃日期</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-number" id="analysisRecentTrend">-</div>
+                            <div class="analysis-label">近期趋势</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-controls">
+                    <h3>文件列表</h3>
+                    <div class="file-controls-right">
+                        <!-- 时间筛选（管理员和访客通用） -->
+                        <div class="time-filter-section">
+                            <div class="time-filters">
+                                <button class="btn-filter active" data-period="all" onclick="filterByTime('all')">全部</button>
+                                <button class="btn-filter" data-period="today" onclick="filterByTime('today')">今天</button>
+                                <button class="btn-filter" data-period="week" onclick="filterByTime('week')">本周</button>
+                                <button class="btn-filter" data-period="month" onclick="filterByTime('month')">本月</button>
+                            </div>
+                            <div class="date-picker-section">
+                                <input type="date" id="specificDate" onchange="filterBySpecificDate()" title="选择特定日期">
+                                <button class="btn-filter" onclick="clearDateFilter()">清除</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 访客专属下载 -->
+                        <div class="user-only download-section">
+                            <button class="btn success" onclick="downloadFiltered()">下载筛选</button>
+                        </div>
+                        
+                        <!-- 管理员控制 -->
+                        <div class="admin-only select-all-area">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                            <label for="selectAllCheckbox">全选</label>
+                            <span class="selected-count" id="selectedCountText"></span>
+                        </div>
+                        
+                        <!-- 访客收起控制 -->
+                        <div class="user-only file-view-controls">
+                            <button class="btn secondary" id="toggleViewBtn" onclick="toggleFileView()">收起列表</button>
+                        </div>
+                        
+                        <!-- 批量操作按钮 -->
+                        <div class="batch-actions admin-only" id="batchActions">
+                            <button class="btn danger" onclick="deleteSelected()">删除选中</button>
+                            <button class="btn warning" onclick="deleteFiltered()">删除筛选</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="file-list-simple" id="fileList">
+                    <div class="no-files">暂无PDF文件</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h3>统计分析</h3>
+            <div class="stats-nav">
+                <button class="btn active" onclick="showStats('week')">本周</button>
+                <button class="btn" onclick="showStats('month')">本月</button>
+                <button class="btn" onclick="showStats('year')">本年</button>
+            </div>
+            <div class="stats-content" id="statsContent">
+                <div class="no-files">选择时间范围查看统计数据</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 管理员密码
+        const ADMIN_PASSWORD = '141617';
+        
+        // 数据存储
+        let files = [];
+        let currentUser = null;
+        let currentStatsView = 'week';
+        let selectedFiles = new Set();
+        let fileListCollapsed = false;
+        let currentTimeFilter = 'all';
+        let specificDateFilter = null;
+
+        // ==========================================
+        // 已启用localStorage数据持久化功能
+        // ==========================================
+
+        // 初始化时加载保存的数据
+        function initializeData() {
+            try {
+                const savedData = localStorage.getItem('pdfManagerData');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    if (parsedData.files && Array.isArray(parsedData.files)) {
+                        console.log('从localStorage恢复元数据:', parsedData.files.length, '个文件记录');
+                        
+                        // 注意：localStorage只能保存文件元数据，不能保存实际文件内容
+                        // 实际文件内容需要用户重新上传或使用导入/导出功能
+                        
+                        // 这里可以显示文件列表，但无法提供查看/下载功能
+                        // 推荐用户使用导入/导出功能来实现完整的数据备份
+                    }
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+            
+            console.log('数据初始化完成 - localStorage已启用');
+            console.log('💡 提示：使用"导出数据"功能可以保存完整的PDF文件内容');
+        }
+
+        // 保存数据到localStorage
+        function saveData() {
+            try {
+                // 保存文件元数据（不包含实际文件内容）
+                const dataToSave = {
+                    version: '1.0',
+                    lastUpdate: new Date().toISOString(),
+                    files: files.map(file => ({
+                        id: file.id,
+                        name: file.name,
+                        size: file.size,
+                        uploadDate: file.uploadDate.toISOString()
+                        // 注意：实际PDF文件内容无法存储在localStorage中
+                        // 推荐使用导入/导出功能实现完整备份
+                    }))
+                };
+                
+                localStorage.setItem('pdfManagerData', JSON.stringify(dataToSave));
+                console.log('元数据已保存到localStorage');
+            } catch (error) {
+                console.error('保存数据失败:', error);
+            }
+        }
+
+        // 数据备份功能
+        async function exportData() {
+            if (files.length === 0) {
+                alert('没有数据可以导出');
+                return;
+            }
+
+            try {
+                const exportBtn = event.target;
+                const originalText = exportBtn.textContent;
+                exportBtn.disabled = true;
+                exportBtn.textContent = '导出中...';
+
+                // 将File对象转换为base64格式进行导出
+                const exportData = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    totalFiles: files.length,
+                    files: []
+                };
+
+                for (let file of files) {
+                    try {
+                        // 将PDF文件转换为base64
+                        const arrayBuffer = await file.file.arrayBuffer();
+                        const base64 = btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
+                        
+                        exportData.files.push({
+                            id: file.id,
+                            name: file.name,
+                            size: file.size,
+                            uploadDate: file.uploadDate.toISOString(),
+                            fileData: base64
+                        });
+                    } catch (error) {
+                        console.error('导出文件失败:', file.name, error);
+                    }
+                }
+
+                // 创建并下载JSON文件
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pdf-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                exportBtn.disabled = false;
+                exportBtn.textContent = originalText;
+                alert(`成功导出 ${exportData.files.length} 个文件的数据！`);
+            } catch (error) {
+                console.error('导出数据失败:', error);
+                alert('导出数据失败，请稍后重试');
+                event.target.disabled = false;
+                event.target.textContent = '导出数据';
+            }
+        }
+
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const importLabel = event.target.parentElement;
+                const originalText = importLabel.textContent;
+                importLabel.style.pointerEvents = 'none';
+                importLabel.textContent = '导入中...';
+
+                const text = await file.text();
+                const importData = JSON.parse(text);
+
+                if (!importData.version || !importData.files || !Array.isArray(importData.files)) {
+                    throw new Error('无效的备份文件格式');
+                }
+
+                let importedCount = 0;
+                let errorCount = 0;
+
+                for (let fileData of importData.files) {
+                    try {
+                        // 将base64转换回File对象
+                        const binaryString = atob(fileData.fileData);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        const blob = new Blob([bytes], { type: 'application/pdf' });
+                        const restoredFile = new File([blob], fileData.name, { type: 'application/pdf' });
+
+                        const fileObj = {
+                            id: fileData.id || Date.now() + Math.random(),
+                            name: fileData.name,
+                            size: fileData.size,
+                            uploadDate: new Date(fileData.uploadDate),
+                            file: restoredFile
+                        };
+
+                        files.push(fileObj);
+                        importedCount++;
+                    } catch (error) {
+                        console.error('导入文件失败:', fileData.name, error);
+                        errorCount++;
+                    }
+                }
+
+                saveData();
+                updateFileDisplay();
+                updateStats();
+
+                importLabel.style.pointerEvents = '';
+                importLabel.textContent = originalText;
+                event.target.value = ''; // 清空input
+
+                let message = `成功导入 ${importedCount} 个文件`;
+                if (errorCount > 0) {
+                    message += `，${errorCount} 个文件导入失败`;
+                }
+                alert(message + '！');
+
+            } catch (error) {
+                console.error('导入数据失败:', error);
+                alert('导入数据失败，请检查文件格式');
+                event.target.parentElement.style.pointerEvents = '';
+                event.target.parentElement.textContent = '导入数据';
+                event.target.value = '';
+            }
+        }
+
+        function clearAllData() {
+            if (files.length === 0) {
+                alert('没有数据需要清空');
+                return;
+            }
+
+            if (confirm(`确定要清空所有 ${files.length} 个文件吗？此操作不可撤销！\n\n建议在清空前先导出备份。`)) {
+                files = [];
+                selectedFiles.clear();
+                saveData();
+                updateFileDisplay();
+                updateStats();
+                alert('所有数据已清空！');
+            }
+        }
+
+        // 密码验证
+        function showPasswordInput() {
+            document.getElementById('passwordInput').style.display = 'block';
+            document.getElementById('adminPassword').focus();
+        }
+
+        function hidePasswordInput() {
+            document.getElementById('passwordInput').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function verifyPassword() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                currentUser = { type: 'admin', name: '管理员' };
+                hidePasswordInput();
+                updateUI();
+            } else {
+                alert('密码错误，请重试');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        // 用户管理
+        function loginAsUser() {
+            currentUser = { type: 'user', name: '访客' };
+            updateUI();
+        }
+
+        function logout() {
+            currentUser = null;
+            selectedFiles.clear();
+            fileListCollapsed = false;
+            currentTimeFilter = 'all';
+            specificDateFilter = null;
+            updateUI();
+        }
+
+        function updateUI() {
+            const authButtons = document.getElementById('authButtons');
+            const userInfo = document.getElementById('userInfo');
+            const userIndicator = document.getElementById('userIndicator');
+            const adminSections = document.querySelectorAll('.admin-only');
+            const userSections = document.querySelectorAll('.user-only');
+
+            if (currentUser) {
+                authButtons.style.display = 'none';
+                userInfo.style.display = 'block';
+                userIndicator.textContent = `${currentUser.name}`;
+                userIndicator.style.background = currentUser.type === 'admin' ? '#007bff' : '#28a745';
+
+                if (currentUser.type === 'admin') {
+                    adminSections.forEach(section => section.classList.add('show'));
+                    userSections.forEach(section => section.classList.remove('show'));
+                } else {
+                    adminSections.forEach(section => section.classList.remove('show'));
+                    userSections.forEach(section => section.classList.add('show'));
+                }
+                
+                // 初始化筛选按钮状态（管理员和访客通用）
+                setTimeout(() => {
+                    document.querySelectorAll('.btn-filter[data-period]').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    const allBtn = document.querySelector('.btn-filter[data-period="all"]');
+                    if (allBtn) allBtn.classList.add('active');
+                    
+                    // 重置筛选状态
+                    currentTimeFilter = 'all';
+                    specificDateFilter = null;
+                    document.getElementById('specificDate').value = '';
+                }, 0);
+            } else {
+                authButtons.style.display = 'block';
+                userInfo.style.display = 'none';
+                adminSections.forEach(section => section.classList.remove('show'));
+                userSections.forEach(section => section.classList.remove('show'));
+            }
+            
+            updateFileDisplay();
+        }
+
+        // 支持Enter键登录
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyPassword();
+            }
+        });
+
+        // 文件上传
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => {
+            if (currentUser && currentUser.type === 'admin') {
+                fileInput.click();
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (currentUser && currentUser.type === 'admin') {
+                uploadArea.classList.add('dragover');
+            }
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            // 只有当拖拽完全离开uploadArea时才移除样式
+            if (!uploadArea.contains(e.relatedTarget)) {
+                uploadArea.classList.remove('dragover');
+            }
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (currentUser && currentUser.type === 'admin') {
+                const droppedFiles = Array.from(e.dataTransfer.files);
+                handleFiles(droppedFiles);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const selectedFiles = Array.from(e.target.files);
+            handleFiles(selectedFiles);
+        });
+
+        function handleFiles(fileList) {
+            const uploadStatus = document.getElementById('uploadStatus');
+            const pdfFiles = Array.from(fileList).filter(file => file.type === 'application/pdf');
+            const nonPdfFiles = fileList.length - pdfFiles.length;
+            
+            if (pdfFiles.length === 0) {
+                showUploadStatus('请选择PDF文件', 'error');
+                return;
+            }
+            
+            // 显示上传中状态
+            showUploadStatus(`正在上传 ${pdfFiles.length} 个文件...`, 'uploading');
+            
+            let uploadedCount = 0;
+            pdfFiles.forEach(file => {
+                const fileObj = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    uploadDate: new Date(),
+                    file: file
+                };
+                files.push(fileObj);
+                uploadedCount++;
+            });
+            
+            // 立即保存和更新
+            saveData();
+            updateFileDisplay();
+            updateStats();
+            
+            // 显示成功状态
+            let successMessage = `✅ 成功上传 ${uploadedCount} 个PDF文件`;
+            if (nonPdfFiles > 0) {
+                successMessage += `，跳过 ${nonPdfFiles} 个非PDF文件`;
+            }
+            showUploadStatus(successMessage, 'success');
+            
+            // 3秒后清除状态信息
+            setTimeout(() => {
+                showUploadStatus('', '');
+            }, 3000);
+            
+            // 清空文件输入
+            document.getElementById('fileInput').value = '';
+        }
+
+        function showUploadStatus(message, type) {
+            const uploadStatus = document.getElementById('uploadStatus');
+            if (uploadStatus) {
+                uploadStatus.textContent = message;
+                uploadStatus.className = `upload-status ${type}`;
+            }
+        }
+
+        // 时间筛选功能
+        function filterByTime(period) {
+            currentTimeFilter = period;
+            specificDateFilter = null;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.btn-filter[data-period]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.btn-filter[data-period="${period}"]`).classList.add('active');
+            
+            // 清除特定日期
+            document.getElementById('specificDate').value = '';
+            
+            // 清空选择并更新显示
+            selectedFiles.clear();
+            updateFileDisplay();
+            updateStats();
+            updateSelectedCount(); // 更新批量操作按钮状态
+        }
+
+        function filterBySpecificDate() {
+            const dateInput = document.getElementById('specificDate');
+            const selectedDate = dateInput.value;
+            
+            if (selectedDate) {
+                specificDateFilter = new Date(selectedDate);
+                currentTimeFilter = 'specific';
+                
+                // 取消其他筛选按钮的激活状态
+                document.querySelectorAll('.btn-filter[data-period]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            } else {
+                specificDateFilter = null;
+                currentTimeFilter = 'all';
+                document.querySelector('.btn-filter[data-period="all"]').classList.add('active');
+            }
+            
+            // 清空选择并更新显示
+            selectedFiles.clear();
+            updateFileDisplay();
+            updateStats();
+            updateSelectedCount(); // 更新批量操作按钮状态
+        }
+
+        function clearDateFilter() {
+            document.getElementById('specificDate').value = '';
+            specificDateFilter = null;
+            filterByTime('all');
+        }
+
+        // 下载筛选结果
+        function downloadFiltered() {
+            const filteredFiles = getFilteredFiles();
+            
+            if (filteredFiles.length === 0) {
+                alert('当前筛选条件下没有文件可下载');
+                return;
+            }
+            
+            let periodName = '';
+            if (currentTimeFilter === 'specific' && specificDateFilter) {
+                periodName = specificDateFilter.toLocaleDateString('zh-CN');
+            } else {
+                const periodNames = {
+                    'all': '全部',
+                    'today': '今日',
+                    'week': '本周', 
+                    'month': '本月'
+                };
+                periodName = periodNames[currentTimeFilter] || '筛选';
+            }
+            
+            if (filteredFiles.length > 10) {
+                if (!confirm(`即将下载${periodName}的 ${filteredFiles.length} 个文件，确定继续吗？`)) {
+                    return;
+                }
+            }
+            
+            const downloadBtn = event.target;
+            const originalText = downloadBtn.textContent;
+            let downloaded = 0;
+            
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = `下载中... (0/${filteredFiles.length})`;
+            
+            // 逐个下载文件
+            filteredFiles.forEach((file, index) => {
+                setTimeout(() => {
+                    const url = URL.createObjectURL(file.file);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    downloaded++;
+                    downloadBtn.textContent = `下载中... (${downloaded}/${filteredFiles.length})`;
+                    
+                    // 所有文件下载完成
+                    if (downloaded === filteredFiles.length) {
+                        setTimeout(() => {
+                            downloadBtn.disabled = false;
+                            downloadBtn.textContent = originalText;
+                            alert(`成功下载${periodName}的 ${filteredFiles.length} 个文件！`);
+                        }, 500);
+                    }
+                }, index * 300);
+            });
+        }
+
+        // 按时间段下载文件
+        function downloadByPeriod(period) {
+            const periodFiles = getFilesByPeriod(period);
+            
+            if (periodFiles.length === 0) {
+                alert(`${getPeriodName(period)}没有文件可下载`);
+                return;
+            }
+            
+            if (periodFiles.length > 10) {
+                if (!confirm(`即将下载${getPeriodName(period)}的 ${periodFiles.length} 个文件，确定继续吗？`)) {
+                    return;
+                }
+            }
+            
+            const downloadBtn = event.target;
+            const originalText = downloadBtn.textContent;
+            let downloaded = 0;
+            
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = `${downloaded}/${periodFiles.length}`;
+            
+            // 逐个下载文件
+            periodFiles.forEach((file, index) => {
+                setTimeout(() => {
+                    const url = URL.createObjectURL(file.file);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    downloaded++;
+                    downloadBtn.textContent = `${downloaded}/${periodFiles.length}`;
+                    
+                    // 所有文件下载完成
+                    if (downloaded === periodFiles.length) {
+                        setTimeout(() => {
+                            downloadBtn.disabled = false;
+                            downloadBtn.textContent = originalText;
+                            alert(`成功下载${getPeriodName(period)}的 ${periodFiles.length} 个文件！`);
+                        }, 500);
+                    }
+                }, index * 300);
+            });
+        }
+
+        // 获取指定时间段的文件
+        function getFilesByPeriod(period) {
+            const now = new Date();
+            let startDate;
+
+            switch (period) {
+                case 'today':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    break;
+                case 'week':
+                    const dayOfWeek = now.getDay();
+                    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    startDate = new Date(now.getTime() - daysToMonday * 24 * 60 * 60 * 1000);
+                    startDate.setHours(0, 0, 0, 0);
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    break;
+                default:
+                    return [];
+            }
+
+            return files.filter(file => file.uploadDate >= startDate);
+        }
+
+        // 获取时间段名称
+        function getPeriodName(period) {
+            const names = {
+                'today': '今日',
+                'week': '本周',
+                'month': '本月',
+                'year': '本年'
+            };
+            return names[period] || '';
+        }
+
+        // 更新时间段统计
+        function updateTimeStats() {
+            if (currentUser && currentUser.type === 'user') {
+                const todayFiles = getFilesByPeriod('today');
+                const weekFiles = getFilesByPeriod('week');
+                const monthFiles = getFilesByPeriod('month');
+                const yearFiles = getFilesByPeriod('year');
+
+                const todayCountElement = document.getElementById('todayCount');
+                const weekCountElement = document.getElementById('weekCount');
+                const monthCountElement = document.getElementById('monthCount');
+                const yearCountElement = document.getElementById('yearCount');
+
+                if (todayCountElement) todayCountElement.textContent = `${todayFiles.length} 个文件`;
+                if (weekCountElement) weekCountElement.textContent = `${weekFiles.length} 个文件`;
+                if (monthCountElement) monthCountElement.textContent = `${monthFiles.length} 个文件`;
+                if (yearCountElement) yearCountElement.textContent = `${yearFiles.length} 个文件`;
+            }
+        }
+
+        // 更新数据分析
+        function updateDataAnalysis() {
+            if (currentUser && currentUser.type === 'user') {
+                const totalFiles = files.length;
+                
+                // 计算日均上传
+                let avgDaily = 0;
+                let mostActiveDate = '-';
+                let recentTrend = '-';
+                
+                if (totalFiles > 0) {
+                    // 获取最早和最晚的上传日期
+                    const dates = files.map(file => file.uploadDate);
+                    const earliestDate = new Date(Math.min.apply(null, dates));
+                    const latestDate = new Date(Math.max.apply(null, dates));
+                    const daysDiff = Math.max(1, Math.ceil((latestDate - earliestDate) / (1000 * 60 * 60 * 24)) + 1);
+                    
+                    avgDaily = Math.round(totalFiles / daysDiff * 10) / 10;
+                    
+                    // 找出最活跃的日期（上传最多文件的日期）
+                    const dateGroups = {};
+                    files.forEach(file => {
+                        const dateKey = file.uploadDate.toDateString();
+                        dateGroups[dateKey] = (dateGroups[dateKey] || 0) + 1;
+                    });
+                    
+                    let maxCount = 0;
+                    Object.entries(dateGroups).forEach(([date, count]) => {
+                        if (count > maxCount) {
+                            maxCount = count;
+                            mostActiveDate = new Date(date).toLocaleDateString('zh-CN');
+                        }
+                    });
+                    
+                    // 计算近期趋势（最近7天 vs 之前7天）
+                    const now = new Date();
+                    const recentWeekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    const previousWeekStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+                    
+                    const recentWeekFiles = files.filter(file => file.uploadDate >= recentWeekStart);
+                    const previousWeekFiles = files.filter(file => 
+                        file.uploadDate >= previousWeekStart && file.uploadDate < recentWeekStart
+                    );
+                    
+                    if (previousWeekFiles.length > 0) {
+                        const change = recentWeekFiles.length - previousWeekFiles.length;
+                        if (change > 0) {
+                            recentTrend = `↗ +${change}`;
+                        } else if (change < 0) {
+                            recentTrend = `↘ ${change}`;
+                        } else {
+                            recentTrend = '→ 持平';
+                        }
+                    } else if (recentWeekFiles.length > 0) {
+                        recentTrend = '↗ 新增';
+                    }
+                }
+                
+                // 更新界面
+                const analysisTotal = document.getElementById('analysisTotal');
+                const analysisAvgDaily = document.getElementById('analysisAvgDaily');
+                const analysisMostActive = document.getElementById('analysisMostActive');
+                const analysisRecentTrend = document.getElementById('analysisRecentTrend');
+                
+                if (analysisTotal) analysisTotal.textContent = totalFiles;
+                if (analysisAvgDaily) analysisAvgDaily.textContent = avgDaily;
+                if (analysisMostActive) analysisMostActive.textContent = mostActiveDate;
+                if (analysisRecentTrend) analysisRecentTrend.textContent = recentTrend;
+            }
+        }
+
+        // 全选功能
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const filteredFiles = getFilteredFiles();
+            
+            if (selectAllCheckbox.checked) {
+                filteredFiles.forEach(file => selectedFiles.add(file.id));
+            } else {
+                selectedFiles.clear();
+            }
+            
+            updateFileDisplay();
+            updateSelectedCount();
+        }
+
+        function toggleFileSelection(fileId) {
+            if (selectedFiles.has(fileId)) {
+                selectedFiles.delete(fileId);
+            } else {
+                selectedFiles.add(fileId);
+            }
+            
+            updateFileDisplay();
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = selectedFiles.size;
+            const selectedCountElement = document.getElementById('selectedCount');
+            const selectedCountText = document.getElementById('selectedCountText');
+            const batchActions = document.getElementById('batchActions');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            
+            if (selectedCountElement) {
+                selectedCountElement.textContent = count;
+            }
+            
+            if (selectedCountText) {
+                selectedCountText.textContent = count > 0 ? `(${count}个)` : '';
+            }
+            
+            if (batchActions && currentUser && currentUser.type === 'admin') {
+                const filteredFiles = getFilteredFiles();
+                const hasFilteredFiles = filteredFiles.length > 0 && currentTimeFilter !== 'all';
+                
+                if (count > 0 || hasFilteredFiles) {
+                    batchActions.classList.add('show');
+                    
+                    // 更新删除筛选按钮的显示状态
+                    const deleteFilteredBtn = batchActions.querySelector('.btn.warning');
+                    if (deleteFilteredBtn) {
+                        if (hasFilteredFiles) {
+                            deleteFilteredBtn.style.display = 'inline-block';
+                        } else {
+                            deleteFilteredBtn.style.display = 'none';
+                        }
+                    }
+                } else {
+                    batchActions.classList.remove('show');
+                }
+            }
+            
+            // 更新全选框状态
+            if (selectAllCheckbox) {
+                const filteredFiles = getFilteredFiles();
+                if (filteredFiles.length === 0) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                } else if (count === filteredFiles.length) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = true;
+                } else if (count > 0) {
+                    selectAllCheckbox.indeterminate = true;
+                } else {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                }
+            }
+        }
+
+        // 批量删除筛选结果（管理员专用）
+        function deleteFiltered() {
+            const filteredFiles = getFilteredFiles();
+            
+            if (filteredFiles.length === 0) {
+                alert('当前筛选条件下没有文件可删除');
+                return;
+            }
+            
+            let periodName = '';
+            if (currentTimeFilter === 'specific' && specificDateFilter) {
+                periodName = specificDateFilter.toLocaleDateString('zh-CN');
+            } else {
+                const periodNames = {
+                    'all': '全部',
+                    'today': '今日',
+                    'week': '本周', 
+                    'month': '本月'
+                };
+                periodName = periodNames[currentTimeFilter] || '筛选';
+            }
+            
+            if (confirm(`确定要删除${periodName}的 ${filteredFiles.length} 个文件吗？此操作不可撤销！`)) {
+                const filteredIds = new Set(filteredFiles.map(file => file.id));
+                files = files.filter(file => !filteredIds.has(file.id));
+                selectedFiles.clear();
+                saveData();
+                updateFileDisplay();
+                updateStats();
+                alert(`成功删除${periodName}的 ${filteredFiles.length} 个文件！`);
+            }
+        }
+
+        // 批量删除选中文件
+        function deleteSelected() {
+            if (selectedFiles.size === 0) return;
+            
+            if (confirm(`确定要删除选中的 ${selectedFiles.size} 个文件吗？`)) {
+                files = files.filter(file => !selectedFiles.has(file.id));
+                selectedFiles.clear();
+                saveData();
+                updateFileDisplay();
+                updateStats();
+            }
+        }
+
+        // 访客收起/展开功能
+        function toggleFileView() {
+            const fileList = document.getElementById('fileList');
+            const toggleBtn = document.getElementById('toggleViewBtn');
+            
+            fileListCollapsed = !fileListCollapsed;
+            
+            if (fileListCollapsed) {
+                fileList.classList.add('collapsed');
+                toggleBtn.textContent = '展开列表';
+            } else {
+                fileList.classList.remove('collapsed');
+                toggleBtn.textContent = '收起列表';
+            }
+        }
+
+        // 获取过滤后的文件
+        function getFilteredFiles() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let filteredFiles = files.filter(file => 
+                file.name.toLowerCase().includes(searchTerm)
+            );
+
+            // 应用时间筛选
+            if (currentTimeFilter !== 'all') {
+                if (currentTimeFilter === 'specific' && specificDateFilter) {
+                    // 筛选特定日期
+                    filteredFiles = filteredFiles.filter(file => {
+                        const fileDate = new Date(file.uploadDate);
+                        return fileDate.toDateString() === specificDateFilter.toDateString();
+                    });
+                } else {
+                    // 筛选时间段
+                    const now = new Date();
+                    let startDate;
+
+                    switch (currentTimeFilter) {
+                        case 'today':
+                            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                            break;
+                        case 'week':
+                            const dayOfWeek = now.getDay();
+                            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                            startDate = new Date(now.getTime() - daysToMonday * 24 * 60 * 60 * 1000);
+                            startDate.setHours(0, 0, 0, 0);
+                            break;
+                        case 'month':
+                            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                            break;
+                    }
+
+                    if (startDate) {
+                        filteredFiles = filteredFiles.filter(file => file.uploadDate >= startDate);
+                    }
+                }
+            }
+
+            return filteredFiles;
+        }
+
+        // 文件显示
+        function updateFileDisplay() {
+            const fileList = document.getElementById('fileList');
+            const filteredFiles = getFilteredFiles();
+
+            // 更新当前显示文件数
+            const visibleFilesElement = document.getElementById('visibleFiles');
+            if (visibleFilesElement) {
+                visibleFilesElement.textContent = filteredFiles.length;
+            }
+
+            if (filteredFiles.length === 0) {
+                fileList.innerHTML = '<div class="no-files">未找到匹配的PDF文件</div>';
+                updateSelectedCount();
+                return;
+            }
+
+            fileList.innerHTML = filteredFiles.map(file => `
+                <div class="file-item ${selectedFiles.has(file.id) ? 'selected' : ''}">
+                    ${currentUser && currentUser.type === 'admin' ? `
+                        <div class="file-checkbox">
+                            <input type="checkbox" 
+                                   ${selectedFiles.has(file.id) ? 'checked' : ''} 
+                                   onchange="toggleFileSelection('${file.id}')">
+                        </div>
+                    ` : ''}
+                    <div class="file-icon-simple">PDF</div>
+                    <div class="file-info">
+                        <div class="file-name-simple" title="${file.name}">${file.name}</div>
+                        <div class="file-date-simple">${file.uploadDate.toLocaleString('zh-CN')}</div>
+                    </div>
+                    <div class="file-actions-simple">
+                        <button class="btn" onclick="viewFile('${file.id}')">查看</button>
+                        <button class="btn secondary" onclick="downloadFile('${file.id}')">下载</button>
+                        ${currentUser && currentUser.type === 'admin' ? 
+                            `<button class="btn danger" onclick="deleteFile('${file.id}')">删除</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            updateSelectedCount();
+        }
+
+        // 文件操作
+        function viewFile(fileId) {
+            const file = files.find(f => f.id == fileId);
+            if (file) {
+                const url = URL.createObjectURL(file.file);
+                window.open(url, '_blank');
+            }
+        }
+
+        function downloadFile(fileId) {
+            const file = files.find(f => f.id == fileId);
+            if (file) {
+                const url = URL.createObjectURL(file.file);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function deleteFile(fileId) {
+            if (confirm('确定要删除这个文件吗？')) {
+                files = files.filter(f => f.id != fileId);
+                selectedFiles.delete(fileId);
+                saveData();
+                updateFileDisplay();
+                updateStats();
+            }
+        }
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', () => {
+            selectedFiles.clear(); // 搜索时清空选择
+            updateFileDisplay();
+            updateStats(); // 更新统计信息，包括当前显示文件数
+            updateSelectedCount(); // 更新批量操作按钮状态
+        });
+
+        // 统计功能
+        function showStats(period) {
+            currentStatsView = period;
+            
+            document.querySelectorAll('.stats-nav .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateStatsDisplay();
+        }
+
+        function updateStatsDisplay() {
+            const statsContent = document.getElementById('statsContent');
+            const now = new Date();
+            let startDate;
+
+            switch (currentStatsView) {
+                case 'week':
+                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    break;
+            }
+
+            const periodFiles = files.filter(file => file.uploadDate >= startDate);
+            
+            if (periodFiles.length === 0) {
+                statsContent.innerHTML = '<div class="no-files">此时间段内无上传记录</div>';
+                return;
+            }
+
+            const groupedByDate = {};
+            periodFiles.forEach(file => {
+                const dateKey = file.uploadDate.toDateString();
+                if (!groupedByDate[dateKey]) {
+                    groupedByDate[dateKey] = [];
+                }
+                groupedByDate[dateKey].push(file);
+            });
+
+            const statsHtml = Object.entries(groupedByDate)
+                .sort(([a], [b]) => new Date(b) - new Date(a))
+                .map(([date, dayFiles]) => `
+                    <div class="stat-item">
+                        <span>${new Date(date).toLocaleDateString('zh-CN')}</span>
+                        <span>${dayFiles.length} 个文件</span>
+                    </div>
+                `).join('');
+
+            statsContent.innerHTML = `
+                <div class="stat-item total">
+                    <span>总计</span>
+                    <span>${periodFiles.length} 个文件</span>
+                </div>
+                ${statsHtml}
+            `;
+        }
+
+        function updateStats() {
+            document.getElementById('totalFiles').textContent = files.length;
+            
+            const today = new Date();
+            const todayFiles = files.filter(file => {
+                return file.uploadDate.toDateString() === today.toDateString();
+            });
+            document.getElementById('todayFiles').textContent = todayFiles.length;
+            
+            // 更新当前显示的文件数
+            const visibleFiles = getFilteredFiles();
+            const visibleFilesElement = document.getElementById('visibleFiles');
+            if (visibleFilesElement) {
+                visibleFilesElement.textContent = visibleFiles.length;
+            }
+            
+            // 更新时间段统计和数据分析
+            updateTimeStats();
+            updateDataAnalysis();
+            
+            updateStatsDisplay();
+        }
+
+        // 初始化
+        initializeData();
+        updateUI();
+        updateStats();
+        
+        // 设置日期选择器的最大值为今天
+        document.getElementById('specificDate').max = new Date().toISOString().split('T')[0];
+        
+        // 防止整个页面的拖拽文件默认行为
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
+        
+        // 添加快捷键支持（管理员专用）
+        document.addEventListener('keydown', (e) => {
+            if (currentUser && currentUser.type === 'admin' && e.ctrlKey && e.key === 'o') {
+                e.preventDefault();
+                document.getElementById('fileInput').click();
+                showUploadStatus('💡 提示：您也可以直接拖拽文件到上传区域', 'uploading');
+                setTimeout(() => showUploadStatus('', ''), 2000);
+            }
+        });
+    </script>
+</body>
+</html>
